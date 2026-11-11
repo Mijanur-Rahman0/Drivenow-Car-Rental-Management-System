@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-cream font-body text-ink antialiased overflow-x-hidden;
+  }
+  h1, h2, h3, h4 { @apply font-head text-dark; }
+}
+
+@layer components {
+  /* buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3 text-[.95rem] font-semibold tracking-wide
+           transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0;
+  }
+  .btn-sm { @apply px-[18px] py-2 text-[.85rem]; }
+  .btn-primary { @apply bg-dark text-cream hover:-translate-y-0.5 hover:bg-dark-hover hover:shadow-soft; }
+  .btn-outline { @apply border-2 border-dark bg-transparent text-dark hover:-translate-y-0.5 hover:bg-dark hover:text-cream; }
+  .btn-sage    { @apply bg-sage text-dark hover:-translate-y-0.5 hover:bg-sage-dark hover:text-cream; }
+  .btn-danger  { @apply bg-[#e74c3c] text-white hover:-translate-y-0.5 hover:bg-[#c0392b]; }
+
+  /* forms */
+  .label { @apply mb-1.5 block text-sm font-semibold text-dark; }
+  .input {
+    @apply w-full rounded-xl border border-dark/15 bg-white px-4 py-3 text-ink outline-none transition
+           placeholder:text-muted/60 focus:border-sage focus:ring-2 focus:ring-sage/30;
+  }
+
+  /* misc */
+  .card { @apply rounded-2xl border border-dark/15 bg-white; }
+  .eyebrow { @apply mb-3 block text-[.8rem] font-bold uppercase tracking-[.12em] text-sage-dark; }
+  .section-line { @apply mt-4 h-1 w-14 rounded bg-sage; }
+}
