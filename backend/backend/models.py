@@ -101,6 +101,12 @@ class Car(models.Model):
         route  = self.route if self.route else "Custom Route"
         return f"{self.car_name} ({self.model}) — {route} — {status}"
 
+    def save(self, *args, **kwargs):
+        if self.price is not None:
+            from decimal import Decimal
+            self.price = Decimal(str(self.price))
+        super().save(*args, **kwargs)
+
     def mark_booked(self):
         self.availability = False
         self.save()
@@ -214,8 +220,11 @@ class Payment(models.Model):
 
     # ✅ AUTO SET AMOUNT
     def save(self, *args, **kwargs):
-        if not self.amount:
+        if not self.amount and self.booking_id:
             self.amount = self.booking.total_cost
+        if self.amount is not None:
+            from decimal import Decimal
+            self.amount = Decimal(str(self.amount))
         super().save(*args, **kwargs)
 
     def mark_success(self):
