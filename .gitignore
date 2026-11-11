@@ -1,0 +1,18 @@
+# python
+.venv/
+venv/
+**/venv/
+__pycache__/
+*.pyc
+*.sqlite3
+backend/staticfiles/
+backend/media/
+
+# node
+**/node_modules/
+**/dist/
+
+# env
+.env
+*.env
+.DS_Store
