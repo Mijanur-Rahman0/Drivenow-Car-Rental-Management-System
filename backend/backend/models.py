@@ -170,7 +170,12 @@ class Booking(models.Model):
 
     @property
     def total_cost(self):
-        return float(self.car.price) * self.duration
+        from decimal import Decimal
+        price = self.car.price
+        # MongoDB stores Decimal as bson.Decimal128 — cast it safely
+        if not isinstance(price, Decimal):
+            price = Decimal(str(price))
+        return float(price) * self.duration
 
     def confirm(self):
         self.booking_status = 'confirmed'

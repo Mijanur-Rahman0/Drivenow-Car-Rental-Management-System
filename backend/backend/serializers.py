@@ -4,11 +4,24 @@ Converts model instances <-> JSON for every API endpoint.
 """
 
 import os
+from decimal import Decimal
 
 from django.core.files.storage import default_storage
 from rest_framework import serializers
 
 from .models import UserProfile, Car, Booking, Payment
+
+
+def _safe_decimal(value):
+    """Convert bson.Decimal128 or any value to Python float safely."""
+    if value is None:
+        return None
+    if isinstance(value, Decimal):
+        return float(value)
+    try:
+        return float(str(value))
+    except (TypeError, ValueError):
+        return 0.0
 
 
 # ─────────────────────────────────────────────────────────────
@@ -68,6 +81,8 @@ class CarSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     # read: original file name stored in the DB (e.g. "car1.png")
     image_name = serializers.SerializerMethodField()
+    # Safe price — handles bson.Decimal128 from MongoDB
+    price = serializers.SerializerMethodField()
 
     class Meta:
         model = Car
@@ -75,6 +90,9 @@ class CarSerializer(serializers.ModelSerializer):
             'id', 'car_name', 'model', 'price', 'availability', 'description',
             'route', 'allow_custom_route', 'image_path', 'image_url', 'image_name',
         ]
+
+    def get_price(self, obj):
+        return _safe_decimal(obj.price)
 
     def get_image_url(self, obj):
         f = obj.image_path
@@ -94,22 +112,31 @@ class CarSerializer(serializers.ModelSerializer):
 # PAYMENT
 # ─────────────────────────────────────────────────────────────
 class PaymentSerializer(serializers.ModelSerializer):
+    amount = serializers.SerializerMethodField()
+
     class Meta:
         model = Payment
         fields = ['id', 'booking', 'amount', 'payment_status', 'transaction_time']
         read_only_fields = fields
+
+    def get_amount(self, obj):
+        return _safe_decimal(obj.amount)
 
 
 class AdminPaymentSerializer(serializers.ModelSerializer):
     booking_id = serializers.IntegerField(source='booking.id', read_only=True)
     user_name = serializers.CharField(source='booking.user.name', read_only=True)
     car_name = serializers.CharField(source='booking.car.car_name', read_only=True)
+    amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
         fields = ['id', 'booking_id', 'user_name', 'car_name',
                   'amount', 'payment_status', 'transaction_time']
         read_only_fields = fields
+
+    def get_amount(self, obj):
+        return _safe_decimal(obj.amount)
 
 
 # ─────────────────────────────────────────────────────────────
