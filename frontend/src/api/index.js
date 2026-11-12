@@ -20,6 +20,7 @@ export const api = {
   bookings: () => request('/bookings/'),
   booking: (id) => request(`/bookings/${id}/`),
   createBooking: (payload) => request('/bookings/', { method: 'POST', json: payload }),
+  returnCar: (bookingId) => request(`/bookings/${bookingId}/return/`, { method: 'POST' }),
   processPayment: (bookingId, action) =>
     request('/payments/process/', { method: 'POST', json: { booking_id: bookingId, action } }),
 

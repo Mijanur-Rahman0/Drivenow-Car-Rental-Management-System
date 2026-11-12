@@ -10,6 +10,15 @@ export const fmtDate = (iso, long = false) =>
     long ? { month: 'long', day: '2-digit', year: 'numeric' } : { month: 'short', day: '2-digit', year: 'numeric' },
   );
 
+/** Format date + time (e.g. "Nov 12, 2026, 03:45 PM") */
+export const fmtDateTime = (iso) => {
+  if (!iso) return null;
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short', day: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+};
+
 export const FALLBACK_IMAGE = '/images/car1.png';
 
 /** Best image for a car: uploaded file -> bundled car image -> rotating default */

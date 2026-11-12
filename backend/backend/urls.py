@@ -15,9 +15,10 @@ urlpatterns = [
     path('routes/',           views.route_list,  name='api_routes'),
 
     # ── Logged-in user: bookings & payment ────────────────
-    path('bookings/',                    views.bookings,        name='api_bookings'),
-    path('bookings/<int:booking_id>/',   views.booking_detail,  name='api_booking_detail'),
-    path('payments/process/',            views.process_payment, name='api_process_payment'),
+    path('bookings/',                        views.bookings,       name='api_bookings'),
+    path('bookings/<int:booking_id>/',       views.booking_detail, name='api_booking_detail'),
+    path('bookings/<int:booking_id>/return/', views.return_car,    name='api_return_car'),
+    path('payments/process/',                views.process_payment, name='api_process_payment'),
 
     # ── Admin (superuser only) ────────────────────────────
     path('admin/stats/',                              views.admin_stats,          name='api_admin_stats'),

@@ -153,7 +153,8 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = [
             'id', 'user', 'car', 'custom_route', 'final_route', 'duration',
-            'booking_status', 'booking_date', 'total_cost', 'payment',
+            'booking_status', 'booking_date', 'pickup_time', 'return_time',
+            'total_cost', 'payment',
         ]
         read_only_fields = fields
 

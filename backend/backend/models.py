@@ -153,7 +153,9 @@ class Booking(models.Model):
         choices=STATUS_CHOICES,
         default='pending',
     )
-    booking_date   = models.DateTimeField(default=timezone.now)
+    booking_date = models.DateTimeField(default=timezone.now)
+    pickup_time  = models.DateTimeField(null=True, blank=True)   # car নেওয়ার সময়
+    return_time  = models.DateTimeField(null=True, blank=True)   # car ফেরত দেওয়ার সময়
 
     class Meta:
         ordering = ['-booking_date']
@@ -178,7 +180,9 @@ class Booking(models.Model):
         return float(price) * self.duration
 
     def confirm(self):
+        """Booking confirm হলে pickup_time record করা হয়।"""
         self.booking_status = 'confirmed'
+        self.pickup_time = timezone.now()
         self.save()
 
     def cancel(self):
@@ -187,7 +191,9 @@ class Booking(models.Model):
         self.save()
 
     def complete(self):
+        """Car ফেরত দিলে return_time record করা হয়।"""
         self.booking_status = 'completed'
+        self.return_time = timezone.now()
         self.car.mark_available()
         self.save()
 

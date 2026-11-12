@@ -229,6 +229,27 @@ def booking_detail(request, booking_id):
 
 
 @api_view(['POST'])
+def return_car(request, booking_id):
+    """
+    User নিজে car ফেরত দিলে এই endpoint call হবে।
+    Booking 'confirmed' থাকলেই return করা যাবে।
+    return_time auto-record হবে।
+    """
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if booking.booking_status != 'confirmed':
+        return _error('Only confirmed bookings can be returned.')
+
+    booking.complete()   # sets return_time + marks car available
+
+    booking = Booking.objects.select_related('car', 'payment').get(pk=booking.pk)
+    return Response({
+        'detail': f'Car returned successfully! Return time: {booking.return_time}',
+        'booking': BookingSerializer(booking, context={'request': request}).data,
+    })
+
+
+@api_view(['POST'])
 def process_payment(request):
     """POST {booking_id, action: 'success' | 'fail'}   (simulated payment)"""
     booking = get_object_or_404(Booking, id=request.data.get('booking_id'), user=request.user)

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Badge from '../../components/Badge';
 import { api } from '../../api';
 import { useToast } from '../../context/ToastContext';
-import { carImage, FALLBACK_IMAGE, money } from '../../utils/format';
+import { carImage, FALLBACK_IMAGE, money, fmtDateTime } from '../../utils/format';
 
 /** Generic admin table: <Table heads={[...]} empty="No rows">{<tr>…</tr>}</Table> */
 export function Table({ heads, children, empty }) {
@@ -96,14 +96,22 @@ export function CarsTable({ cars, actions, withImage = false }) {
 
 export function BookingsTable({ bookings, actions }) {
   return (
-    <Table heads={['ID', 'User', 'Car', 'Route', 'Status', 'Actions']} empty="No bookings found">
+    <Table heads={['ID', 'User', 'Car', 'Route', 'Duration', 'Total', 'Status', 'Pickup Time', 'Return Time', 'Actions']} empty="No bookings found">
       {bookings.map((b) => (
         <tr key={b.id} className="border-b">
           <td className="p-2">{b.id}</td>
           <td className="p-2">{b.user.name}</td>
           <td className="p-2">{b.car.car_name}</td>
           <td className="p-2">{b.final_route}</td>
+          <td className="p-2">{b.duration}d</td>
+          <td className="p-2 whitespace-nowrap">BDT {money(b.total_cost)}</td>
           <td className="p-2"><Badge status={b.booking_status} /></td>
+          <td className="p-2 text-xs text-green-700 whitespace-nowrap">
+            {b.pickup_time ? fmtDateTime(b.pickup_time) : <span className="text-gray-400">—</span>}
+          </td>
+          <td className="p-2 text-xs text-blue-700 whitespace-nowrap">
+            {b.return_time ? fmtDateTime(b.return_time) : <span className="text-gray-400">—</span>}
+          </td>
           <td className="space-x-2 whitespace-nowrap p-2">
             <SmallBtn color="green" onClick={() => actions.bookingAction(b, 'approve')}>Approve</SmallBtn>
             <SmallBtn color="red" onClick={() => actions.bookingAction(b, 'cancel')}>Cancel</SmallBtn>
