@@ -19,6 +19,7 @@ import AdminBookings from './pages/admin/AdminBookings';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminPayments from './pages/admin/AdminPayments';
 import AdminRoutes from './pages/admin/AdminRoutes';
+import AdminTracking from './pages/admin/AdminTracking';
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index element={<AdminDashboard />} />
+        <Route path="tracking" element={<AdminTracking />} />
         <Route path="cars" element={<AdminCars />} />
         <Route path="cars/:carId/edit" element={<AdminCarEdit />} />
         <Route path="bookings" element={<AdminBookings />} />

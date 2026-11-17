@@ -6,10 +6,11 @@ import useAsync from '../utils/useAsync';
 import Badge from '../components/Badge';
 import Alert from '../components/Alert';
 import Spinner from '../components/Spinner';
+import UserTrackingModal from '../components/UserTrackingModal';
 import { carImage, cap, FALLBACK_IMAGE, fmtDate, fmtDateTime, money, plural } from '../utils/format';
-import { MapPin, Calendar, ClipboardList, Car, CheckCircle2, LogIn, LogOut } from 'lucide-react';
+import { MapPin, Calendar, ClipboardList, Car, CheckCircle2, LogIn, LogOut, Navigation } from 'lucide-react';
 
-function BookingCard({ b, showPay, onReturn }) {
+function BookingCard({ b, showPay, onReturn, onTrack }) {
   const [returning, setReturning] = useState(false);
 
   const handleReturn = async () => {
@@ -61,9 +62,21 @@ function BookingCard({ b, showPay, onReturn }) {
           {showPay && b.booking_status === 'pending' && (
             <div><Link to={`/payment/${b.id}`} className="btn btn-primary btn-sm mt-1">Pay Now</Link></div>
           )}
-          {/* Return Car button — only for confirmed bookings */}
-          {b.booking_status === 'confirmed' && onReturn && (
-            <div>
+          
+          <div className="flex flex-col gap-1 items-end">
+            {/* Live Track Car button — for confirmed/active bookings */}
+            {b.booking_status === 'confirmed' && onTrack && (
+              <button
+                onClick={() => onTrack(b)}
+                className="btn btn-sm mt-1 inline-flex items-center gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                Live GPS Track
+              </button>
+            )}
+
+            {/* Return Car button — only for confirmed bookings */}
+            {b.booking_status === 'confirmed' && onReturn && (
               <button
                 onClick={handleReturn}
                 disabled={returning}
@@ -72,8 +85,9 @@ function BookingCard({ b, showPay, onReturn }) {
                 <LogOut className="h-4 w-4" />
                 {returning ? 'Returning…' : 'Return Car'}
               </button>
-            </div>
-          )}
+            )}
+          </div>
+
           {!showPay && b.payment && (
             <div className="text-xs text-muted">Payment: <Badge status={b.payment.payment_status} /></div>
           )}
@@ -97,6 +111,7 @@ export default function Dashboard() {
   const { isAdmin, updateUser, signOut } = useAuth();
   const [tab, setTab] = useState('current');
   const [bookings, setBookings] = useState([]);
+  const [trackingBooking, setTrackingBooking] = useState(null);
   const { data, loading, error } = useAsync(() => Promise.all([api.me(), api.bookings()]), []);
   const [me] = data || [null, []];
 
@@ -176,7 +191,15 @@ export default function Dashboard() {
         {!loading && tab === 'current' && (
           <div className="space-y-4">
             {current.length
-              ? current.map((b) => <BookingCard key={b.id} b={b} showPay onReturn={handleReturn} />)
+              ? current.map((b) => (
+                  <BookingCard
+                    key={b.id}
+                    b={b}
+                    showPay
+                    onReturn={handleReturn}
+                    onTrack={(selected) => setTrackingBooking(selected)}
+                  />
+                ))
               : <Empty icon={Car} text="No active bookings."><Link to="/#cars" className="btn btn-primary btn-sm mt-4">Browse Cars</Link></Empty>}
           </div>
         )}
@@ -204,6 +227,14 @@ export default function Dashboard() {
               <button onClick={signOut} className="btn btn-outline btn-sm">Logout</button>
             </div>
           </div>
+        )}
+
+        {/* Live GPS Tracking Modal */}
+        {trackingBooking && (
+          <UserTrackingModal
+            booking={trackingBooking}
+            onClose={() => setTrackingBooking(null)}
+          />
         )}
       </div>
     </div>

@@ -199,6 +199,29 @@ class Booking(models.Model):
 
 
 # ─────────────────────────────────────────────────────────────
+# CAR LOCATION TRACKER
+# ─────────────────────────────────────────────────────────────
+
+class CarLocation(models.Model):
+    """
+    প্রতিটি Car এর real-time location।
+    Admin manually update করবে; User confirmed booking এ দেখতে পাবে।
+    """
+    car = models.OneToOneField(
+        Car,
+        on_delete=models.CASCADE,
+        related_name='location',
+    )
+    latitude  = models.FloatField(default=23.8103)   # Dhaka default
+    longitude = models.FloatField(default=90.4125)
+    location_name = models.CharField(max_length=200, blank=True, default='Dhaka, Bangladesh')
+    last_updated  = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.car.car_name} → {self.location_name} ({self.latitude:.4f}, {self.longitude:.4f})"
+
+
+# ─────────────────────────────────────────────────────────────
 # PAYMENT
 # ─────────────────────────────────────────────────────────────
 

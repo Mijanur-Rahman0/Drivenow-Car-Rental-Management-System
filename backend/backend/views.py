@@ -17,10 +17,10 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, BasePermission
 from rest_framework.response import Response
 
-from .models import Booking, Car, Payment, UserProfile
+from .models import Booking, Car, CarLocation, Payment, UserProfile
 from .serializers import (
     AdminPaymentSerializer, BookingCreateSerializer, BookingSerializer,
-    CarSerializer, RegisterSerializer, UserSerializer,
+    CarSerializer, CarLocationSerializer, RegisterSerializer, UserSerializer,
 )
 
 
@@ -394,3 +394,95 @@ def admin_payments(request):
     qs = Payment.objects.select_related('booking', 'booking__user', 'booking__car') \
                         .order_by('-transaction_time')
     return Response(AdminPaymentSerializer(qs, many=True).data)
+
+
+# ─────────────────────────────────────────────────────────────
+# CAR LOCATION TRACKER
+# ─────────────────────────────────────────────────────────────
+
+@api_view(['GET'])
+def car_location(request, car_id):
+    """
+    GET — Car এর current location দেখাও।
+    User: নিজের confirmed/pending booking এর car এর location দেখতে পাবে।
+    Admin: যেকোনো car এর location দেখতে পাবে।
+    """
+    car = get_object_or_404(Car, id=car_id)
+
+    # Non-admin users: শুধু নিজের active booking এর car track করতে পারবে
+    if not (request.user.is_authenticated and request.user.is_superuser):
+        if not request.user.is_authenticated:
+            return _error('Authentication required.', status.HTTP_401_UNAUTHORIZED)
+        has_booking = Booking.objects.filter(
+            user=request.user,
+            car=car,
+            booking_status__in=['pending', 'confirmed'],
+        ).exists()
+        if not has_booking:
+            return _error('You do not have an active booking for this car.', status.HTTP_403_FORBIDDEN)
+
+    # Location get or create (default: Dhaka)
+    loc, _ = CarLocation.objects.get_or_create(
+        car=car,
+        defaults={'latitude': 23.8103, 'longitude': 90.4125, 'location_name': 'Dhaka, Bangladesh'},
+    )
+    return Response(CarLocationSerializer(loc).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperUser])
+def admin_update_location(request, car_id):
+    """
+    POST {latitude, longitude, location_name}
+    Admin car এর location update করবে।
+    """
+    car = get_object_or_404(Car, id=car_id)
+    lat  = request.data.get('latitude')
+    lng  = request.data.get('longitude')
+    name = request.data.get('location_name', '').strip()
+
+    if lat is None or lng is None:
+        return _error('latitude and longitude are required.')
+
+    try:
+        lat = float(lat)
+        lng = float(lng)
+    except (TypeError, ValueError):
+        return _error('latitude and longitude must be numbers.')
+
+    if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+        return _error('Invalid coordinates.')
+
+    loc, _ = CarLocation.objects.get_or_create(car=car)
+    loc.latitude = lat
+    loc.longitude = lng
+    if name:
+        loc.location_name = name
+    loc.save()
+
+    return Response({
+        'detail': f'Location updated for {car.car_name}.',
+        'location': CarLocationSerializer(loc).data,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperUser])
+def admin_all_locations(request):
+    """Admin: সব car এর location একসাথে দেখো (map overview)."""
+    cars = Car.objects.all().order_by('id')
+    result = []
+    for car in cars:
+        loc, _ = CarLocation.objects.get_or_create(
+            car=car,
+            defaults={'latitude': 23.8103, 'longitude': 90.4125, 'location_name': 'Dhaka, Bangladesh'},
+        )
+        result.append({
+            'car_id': car.id,
+            'car_name': car.car_name,
+            'model': car.model,
+            'availability': car.availability,
+            'route': car.route,
+            'location': CarLocationSerializer(loc).data,
+        })
+    return Response(result)

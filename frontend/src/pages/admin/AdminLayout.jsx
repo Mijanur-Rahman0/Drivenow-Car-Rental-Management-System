@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
   ['/admin', 'Dashboard', true],
+  ['/admin/tracking', 'Vehicle Tracking (Live)'],
   ['/admin/cars', 'Manage Cars'],
   ['/admin/bookings', 'Manage Bookings'],
   ['/admin/users', 'Manage Users'],
@@ -12,8 +13,13 @@ const NAV = [
 ];
 
 const TITLES = {
-  '/admin': 'Admin Dashboard', '/admin/cars': 'Manage Cars', '/admin/bookings': 'Manage Bookings',
-  '/admin/users': 'Manage Users', '/admin/payments': 'Payment Records', '/admin/routes': 'Route Management',
+  '/admin': 'Admin Dashboard',
+  '/admin/tracking': 'Vehicle Location Tracking (GPS Simulation)',
+  '/admin/cars': 'Manage Cars',
+  '/admin/bookings': 'Manage Bookings',
+  '/admin/users': 'Manage Users',
+  '/admin/payments': 'Payment Records',
+  '/admin/routes': 'Route Management',
 };
 
 export default function AdminLayout() {

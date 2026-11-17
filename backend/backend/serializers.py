@@ -9,7 +9,7 @@ from decimal import Decimal
 from django.core.files.storage import default_storage
 from rest_framework import serializers
 
-from .models import UserProfile, Car, Booking, Payment
+from .models import UserProfile, Car, Booking, Payment, CarLocation
 
 
 def _safe_decimal(value):
@@ -22,6 +22,19 @@ def _safe_decimal(value):
         return float(str(value))
     except (TypeError, ValueError):
         return 0.0
+
+
+# ─────────────────────────────────────────────────────────────
+# CAR LOCATION
+# ─────────────────────────────────────────────────────────────
+class CarLocationSerializer(serializers.ModelSerializer):
+    car_id   = serializers.IntegerField(source='car.id', read_only=True)
+    car_name = serializers.CharField(source='car.car_name', read_only=True)
+
+    class Meta:
+        model  = CarLocation
+        fields = ['car_id', 'car_name', 'latitude', 'longitude', 'location_name', 'last_updated']
+        read_only_fields = fields
 
 
 # ─────────────────────────────────────────────────────────────
