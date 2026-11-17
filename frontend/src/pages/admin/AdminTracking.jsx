@@ -342,7 +342,15 @@ export default function AdminTracking() {
                     }}
                   >
                     <Popup>
-                      <div className="p-1 space-y-1 text-xs font-sans">
+                      <div className="p-1 space-y-1.5 text-xs font-sans max-w-[210px]">
+                        {v.carImage && (
+                          <img
+                            src={v.carImage}
+                            alt={v.carName}
+                            className="w-full h-24 object-cover rounded-md border border-gray-200"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        )}
                         <div className="font-bold text-sm text-dark">{v.carName}</div>
                         <div><strong>Customer:</strong> {v.userName}</div>
                         <div><strong>Route:</strong> {v.route}</div>
@@ -368,7 +376,15 @@ export default function AdminTracking() {
                     icon={createParkingIcon()}
                   >
                     <Popup>
-                      <div className="p-1 text-xs">
+                      <div className="p-1 text-xs max-w-[200px] space-y-1">
+                        {c.carImage && (
+                          <img
+                            src={c.carImage}
+                            alt={c.car_name}
+                            className="w-full h-20 object-cover rounded border border-gray-200"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        )}
                         <div className="font-bold text-dark">{c.car_name} (Parking)</div>
                         <div>{c.parking?.address}</div>
                         <div className="mt-1">
@@ -439,6 +455,25 @@ export default function AdminTracking() {
                   )}
                 </div>
               </div>
+
+              {/* Car Image Preview */}
+              {selectedVehicle.carImage ? (
+                <div className="relative h-44 w-full overflow-hidden rounded-xl border border-dark/10 bg-slate-50 shadow-inner">
+                  <img
+                    src={selectedVehicle.carImage}
+                    alt={selectedVehicle.carName}
+                    className="h-full w-full object-cover object-center transition-transform hover:scale-105 duration-300"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <div className="absolute bottom-2 left-2 rounded-md bg-dark/80 px-2.5 py-1 text-[11px] font-medium text-cream backdrop-blur-sm">
+                    {selectedVehicle.model} • {selectedVehicle.route}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex h-24 w-full items-center justify-center rounded-xl bg-warm/30 border border-dashed border-dark/15 text-muted text-xs">
+                  <CarIcon className="h-5 w-5 mr-1.5 opacity-50" /> No car photo available
+                </div>
+              )}
 
               {/* Telemetry Cards */}
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -551,15 +586,29 @@ export default function AdminTracking() {
                   onClick={() => setSelectedRentalId(v.rentalId)}
                   className={`p-2.5 rounded-xl cursor-pointer flex items-center justify-between text-xs transition ${
                     v.rentalId === selectedRentalId
-                      ? 'bg-warm/50 font-bold border border-dark/20'
+                      ? 'bg-warm/50 font-bold border border-dark/20 shadow-sm'
                       : 'hover:bg-gray-50'
                   }`}
                 >
-                  <div>
-                    <div className="text-dark font-semibold">{v.carName}</div>
-                    <div className="text-gray-400">{v.route}</div>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {v.carImage ? (
+                      <img
+                        src={v.carImage}
+                        alt={v.carName}
+                        className="w-10 h-8 rounded-lg object-cover border border-dark/10 shrink-0"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-10 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                        <CarIcon className="w-4 h-4 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="truncate">
+                      <div className="text-dark font-semibold truncate">{v.carName}</div>
+                      <div className="text-gray-400 text-[11px] truncate">{v.route}</div>
+                    </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0 ml-2">
                     {v.isOverdue ? (
                       <span className="text-red-600 font-bold">Overdue</span>
                     ) : (
