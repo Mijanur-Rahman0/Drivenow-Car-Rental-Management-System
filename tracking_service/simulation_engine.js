@@ -189,18 +189,21 @@ class SimulationEngine {
     const timestamp = new Date();
 
     // Check overdue status
-    const bookingCol = this.db.collection('backend_booking');
-    const booking = await bookingCol.findOne({ id: sim.rentalId });
     let isOverdue = false;
     let expectedReturnTime = null;
-
-    if (booking) {
-      const bookingDate = new Date(booking.booking_date);
-      const durationDays = Number(booking.duration) || 1;
-      expectedReturnTime = new Date(bookingDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
-      if (new Date() > expectedReturnTime && booking.booking_status !== 'completed') {
-        isOverdue = true;
+    try {
+      const bookingCol = this.db.collection('backend_booking');
+      const booking = await bookingCol.findOne({ id: sim.rentalId });
+      if (booking) {
+        const bookingDate = new Date(booking.booking_date);
+        const durationDays = Number(booking.duration) || 1;
+        expectedReturnTime = new Date(bookingDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+        if (new Date() > expectedReturnTime && booking.booking_status !== 'completed') {
+          isOverdue = true;
+        }
       }
+    } catch (err) {
+      console.warn('[Simulation Engine] Booking fetch error:', err.message);
     }
 
     const payload = {

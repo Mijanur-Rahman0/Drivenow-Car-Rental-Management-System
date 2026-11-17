@@ -28,7 +28,10 @@ let simulationEngine = null;
 
 // Connect to MongoDB
 async function initMongo() {
-  const client = new MongoClient(MONGO_URI);
+  const client = new MongoClient(MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+  });
   await client.connect();
   db = client.db(DB_NAME);
   console.log(`[Tracking Service] Connected to MongoDB database: ${DB_NAME}`);
